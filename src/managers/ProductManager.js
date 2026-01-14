@@ -1,4 +1,5 @@
 import fs from "fs";
+import crypto from "crypto";
 
 export default class ProductManager {
   constructor(path) {
@@ -17,13 +18,20 @@ export default class ProductManager {
   }
 
   async addProduct(product) {
-    const products = await this.getProducts();
+    // Validar campos obligatorios
+    const required = ['title', 'description', 'code', 'price', 'status', 'stock', 'category', 'thumbnails'];
+    const missing = required.filter(field => !(field in product));
+    
+    if (missing.length > 0) {
+      throw new Error(`Campos faltantes: ${missing.join(', ')}`);
+    }
 
+    const products = await this.getProducts();
     const newProduct = {
       id: crypto.randomUUID(),
       ...product
     };
-
+    
     products.push(newProduct);
     await fs.promises.writeFile(this.path, JSON.stringify(products, null, 2));
     return newProduct;
@@ -42,8 +50,12 @@ export default class ProductManager {
 
   async deleteProduct(id) {
     const products = await this.getProducts();
+    const product = products.find(p => p.id === id);
+    
+    if (!product) return null;
+    
     const filtered = products.filter(p => p.id !== id);
-
     await fs.promises.writeFile(this.path, JSON.stringify(filtered, null, 2));
+    return product;
   }
 }
