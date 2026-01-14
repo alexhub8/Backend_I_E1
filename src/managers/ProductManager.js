@@ -18,7 +18,6 @@ export default class ProductManager {
   }
 
   async addProduct(product) {
-    // Validar campos obligatorios
     const required = ['title', 'description', 'code', 'price', 'status', 'stock', 'category', 'thumbnails'];
     const missing = required.filter(field => !(field in product));
     
